@@ -67,9 +67,34 @@ function! s:get_industry()
     return {'total_num': up_num + down_num, 'industry':industry, 'up_num': up_num, 'down_num': down_num, 'max_up': max_up, 'max_down': max_down}
 endfunction
 
-let s:green = ['#55bb8a', '#3c9566', '#207f4c', '#43b244', '#8cc269', '#20a162', '#41ae3c', '#5bae23', '#5dbe8a', '#579572', '#2c9678', '#12aa9c', '#41b349', '#248067', '#40a070', '#83cbac', '#1a6840', '#229453']
+let s:red = ['#e597b2', '#eb507e', '#ec4e8a', '#d13c74', '#de3f7c', '#bf3553', '#ed3b2f', '#d9333f', '#c21f30', '#cc163a',  '#e60000', '#7c1823']
 
-let s:red = ['#ef498b', '#c21f30', '#e60000', '#d11a2d', '#cf4813', '#f04a3a', '#d2568c', '#ec2b24', '#eb507e', '#e16c96', '#eb261a', '#b14b28', '#d9333f', '#e95464', '#c02c38', '#f2481b', '#f03f24', '#7c1823', '#de1c31', '#bf3553', '#f1908c']
+let s:green = ['#9eccab', '#bacf65', '#55bb8a', '#248067', '#1a6840', '#057748', '#207f4c', '#0c8918', '#5bae23', '#229453', '#00bc12', '#00e500']
+
+
+function! s:get_color(up_down, all_up, all_down)
+    if a:up_down == 0
+        return '#2b333e'
+    endif
+    let up_down = a:up_down
+    let index = 0
+    if up_down > 0
+        for x in a:all_up
+            if x == up_down
+                return s:red[float2nr(index * 1.0 / len(a:all_up) * 12)]
+            endif
+            let index +=1
+        endfor
+    endif
+    if up_down < 0
+        for x in a:all_down
+            let index += 1
+            if x == up_down
+                return s:green[float2nr((len(a:all_down)- index) * 1.0 / len(a:all_down) * 12)]
+            endif
+        endfor
+    endif
+endfunction
 
 let s:size = {
             \0:{'width': 12, 'height': 6},
@@ -172,11 +197,20 @@ function! s:tile_stock_industry(...)
     endif
     let industry = industry['industry']
     let all_indusrty = []
+    let all_down = []
+    let all_up = []
     for x in range(3)
         for y in industry[x]
             call add(all_indusrty, y)
+            if y['up_down'] > 0
+                call add(all_up, y['up_down'])
+            elseif y['up_down'] < 0
+                call add(all_down, y['up_down'])
+            endif
         endfor
     endfor
+    let all_down = sort(all_down, 'f')
+    let all_up = sort(all_up, 'f')
     let all_indusrty = sort(all_indusrty, function('s:sort_market_value'))
     let gap_num = 0
     call popup_clear()
@@ -227,11 +261,10 @@ function! s:tile_stock_industry(...)
                         let item = s:get_industry_to_tile(size_index, industry)
                         let industry_name = item['name']
                         let up_down = item['up_down']
+                        let color = s:get_color(up_down, all_up, all_down)
                         if up_down >= 0
-                            let color = s:red[float2nr(stock#random() * len(s:red))]
                             let up_down = '+'.up_down.'%'
                         else
-                            let color = s:green[float2nr(stock#random() * len(s:green))]
                             let up_down = '-'.up_down.'%'
                         endif
                         if len(item['name']) == 0
@@ -270,11 +303,10 @@ function! s:tile_stock_industry(...)
     for item in all_indusrty
         let industry_name = item['name']
         let up_down = item['up_down']
+        let color = s:get_color(up_down, all_up, all_down)
         if up_down >= 0
-            let color = s:red[float2nr(stock#random() * len(s:red))]
             let up_down = '+'.up_down.'%'
         else
-            let color = s:green[float2nr(stock#random() * len(s:green))]
             let up_down = '-'.up_down.'%'
         endif
         let win = win_area[index]
