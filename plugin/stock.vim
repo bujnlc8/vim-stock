@@ -198,10 +198,12 @@ function! s:tile_stock_industry(...)
                         let w = -2
                     elseif 0.15 <= r && r < 0.25
                         let w = -1
-                    elseif 0.25 <= r && r < 0.5
+                    elseif 0.25 <= r && r < 0.375
                         let w = 0
-                    elseif 0.5 <= r && r < 0.75
+                    elseif 0.375 <= r && r < 0.5
                         let w = 1
+                    elseif 0.5 <= r && r < 0.75
+                        let w = 2
                     else
                         let w = 3
                     endif
@@ -278,6 +280,9 @@ function! s:tile_stock_industry(...)
         let win = win_area[index]
         call s:_show_color(color, win[5], win[4], win[2], win[3], disappear, industry_name, up_down, win[0])
         let index += 1
+        if index == len(win_area)
+            break
+        endif
     endfor
 endfunction
 

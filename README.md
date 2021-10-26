@@ -1,5 +1,7 @@
 # 一个以颜色显示A股行业涨跌的VIM插件
 
+色块的大小与行业市值大小相匹配
+
 先上图:
 
 [![5IOsIg.png](https://z3.ax1x.com/2021/10/26/5IOsIg.png)](https://imgtu.com/i/5IOsIg)
@@ -20,5 +22,6 @@ OR
 
 
 * `:Ca + [disappear]`， 以随机色块显示行业涨跌，绿色表示跌，红色表示涨。可接收一个参数`disappear`:是否自动消失，1是，0否，默认0。
-* `:Car + repeat_times`， 以随机色块显示行业涨跌，绿色表示跌，红色表示涨。可接收一个参数`repeat_times`:重复次数，15s刷新一次。
+
+* `:Car + repeat_times`， 以随机色块显示行业涨跌，绿色表示跌，红色表示涨。需要一个参数`repeat_times`:重复次数，15秒刷新一次。
 
