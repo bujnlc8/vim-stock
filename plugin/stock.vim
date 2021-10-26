@@ -55,21 +55,21 @@ function! s:get_industry()
             endif
         endif
         if abs(item['f3']) >= 2
-            call add(industry[3], {'name': item['f14'], 'up_down': item['f3'], 'stock': item['f128'], 'stock_up_down': item['f136']})
+            call add(industry[3], {'name': item['f14'], 'up_down': item['f3'], 'stock': item['f128'], 'stock_up_down': item['f136'], 'market_value': item['f20']})
         elseif abs(item['f3']) < 2 && abs(item['f3']) >= 1
-            call add(industry[2], {'name': item['f14'], 'up_down': item['f3'], 'stock': item['f128'], 'stock_up_down': item['f136']})
+            call add(industry[2], {'name': item['f14'], 'up_down': item['f3'], 'stock': item['f128'], 'stock_up_down': item['f136'], 'market_value': item['f20']})
         elseif abs(item['f3']) < 1 && abs(item['f3']) >= 0.6
-            call add(industry[2], {'name': item['f14'], 'up_down': item['f3'], 'stock': item['f128'], 'stock_up_down': item['f136']})
+            call add(industry[1], {'name': item['f14'], 'up_down': item['f3'], 'stock': item['f128'], 'stock_up_down': item['f136'], 'market_value': item['f20']})
         else
-            call add(industry[1], {'name': item['f14'], 'up_down': item['f3'], 'stock': item['f128'], 'stock_up_down': item['f136']})
+            call add(industry[0], {'name': item['f14'], 'up_down': item['f3'], 'stock': item['f128'], 'stock_up_down': item['f136'], 'market_value': item['f20']})
         endif
     endfor
     return {'total_num': up_num + down_num, 'industry':industry, 'up_num': up_num, 'down_num': down_num, 'max_up': max_up, 'max_down': max_down}
 endfunction
 
-let s:green = ['#55bb8a', '#3c9566', '#207f4c', '#43b244', '#8cc269', '#20a162', '#41ae3c', '#5bae23', '#5dbe8a', '#579572', '#2c9678']
+let s:green = ['#55bb8a', '#3c9566', '#207f4c', '#43b244', '#8cc269', '#20a162', '#41ae3c', '#5bae23', '#5dbe8a', '#579572', '#2c9678', '#12aa9c', '#41b349', '#248067', '#40a070', '#83cbac', '#1a6840', '#229453']
 
-let s:red = ['#ef498b', '#c21f30', '#e60000', '#d11a2d', '#cf4813', '#f04a3a', '#d2568c', '#ec2b24', '#eb507e', '#e16c96', '#eb261a']
+let s:red = ['#ef498b', '#c21f30', '#e60000', '#d11a2d', '#cf4813', '#f04a3a', '#d2568c', '#ec2b24', '#eb507e', '#e16c96', '#eb261a', '#b14b28', '#d9333f', '#e95464', '#c02c38', '#f2481b', '#f03f24', '#7c1823', '#de1c31', '#bf3553', '#f1908c']
 
 let s:size = {
             \0:{'width': 12, 'height': 6},
@@ -120,6 +120,36 @@ function! s:get_industry_to_tile(size_index, industry)
     endif
 endfunction
 
+function! s:sort_area(left, right)
+    if a:left[1] > a:right[1]
+        return -1
+    elseif a:left[1] == a:right[1]
+        return 0
+    else
+        return  1
+    endif
+endfunction
+
+function! s:sort_market_value(left, right)
+    if a:left['market_value'] > a:right['market_value']
+        return -1
+    elseif a:left['market_value'] == a:right['market_value']
+        return 0
+    else
+        return  1
+    endif
+endfunction
+
+function! s:tile_stock_industry_repeatable(times)
+    let index = 0
+    while index < a:times + 0
+        call s:tile_stock_industry()
+        let index += 1
+        redraw!
+        15sleep
+    endwhile
+endfunction
+
 function! s:tile_stock_industry(...)
     let disappear = 0
     if len(a:000) == 1
@@ -141,8 +171,16 @@ function! s:tile_stock_industry(...)
         let extra_color = '#61ac85'
     endif
     let industry = industry['industry']
+    let all_indusrty = []
+    for x in range(3)
+        for y in industry[x]
+            call add(all_indusrty, y)
+        endfor
+    endfor
+    let all_indusrty = sort(all_indusrty, function('s:sort_market_value'))
     let gap_num = 0
     call popup_clear()
+    let win_area = []
     for y in range(g:stock_height_split_num)
         let y_border = y_list[y]
         for x in range(g:stock_width_split_num)
@@ -155,30 +193,43 @@ function! s:tile_stock_industry(...)
             let width = size['width']
             while start_y < y_border[1]
                 while start_x < x_border[1]
-                    if x_border[1] - start_x < size['width'] && x < (g:stock_width_split_num -1)
+                    let r = stock#random()
+                    if r < 0.15
+                        let w = -2
+                    elseif 0.15 <= r && r < 0.25
+                        let w = -1
+                    elseif 0.25 <= r && r < 0.5
+                        let w = 0
+                    elseif 0.5 <= r && r < 0.75
+                        let w = 1
+                    else
+                        let w = 3
+                    endif
+                    let sub_x = x_border[1] - start_x
+                    let tmp_width = min([size['width'] + w, sub_x])
+                    if sub_x < tmp_width + 10
+                        let tmp_width = sub_x
+                    endif
+                    if x_border[1] - start_x < tmp_width && x < (g:stock_width_split_num -1)
                         if !has_key(sub, x.y)
                             let x_list[x+1][0] = x_list[x+1][0] - (x_border[1]-start_x)
                             let sub[x.y] = 0
                         endif
                     else
-                        let sub_x = x_border[1] - start_x
-                        let width = min([size['width'], sub_x])
-                        if x == (g:stock_width_split_num -1) && sub_x > size['width'] && sub_x < 10 + size['width']
-                            let width = sub_x
-                        endif
+                        let width = tmp_width
                         let sub_y = y_border[1]-start_y
                         let height = min([size['height'], sub_y])
-                        if sub_y > size['height'] && sub_y < 3 + size['height']
+                        if sub_y > size['height'] && sub_y < 4 + size['height']
                             let height = sub_y
                         endif
                         let item = s:get_industry_to_tile(size_index, industry)
                         let industry_name = item['name']
                         let up_down = item['up_down']
                         if up_down >= 0
-                            let color = s:red[float2nr(stock#random() * 11)]
+                            let color = s:red[float2nr(stock#random() * len(s:red))]
                             let up_down = '+'.up_down.'%'
                         else
-                            let color = s:green[float2nr(stock#random() * 11)]
+                            let color = s:green[float2nr(stock#random() * len(s:green))]
                             let up_down = '-'.up_down.'%'
                         endif
                         if len(item['name']) == 0
@@ -198,7 +249,10 @@ function! s:tile_stock_industry(...)
                             endif
                             let gap_num += 1
                         endif
-                        call s:_show_color(color, start_y, start_x, width, height, disappear, industry_name, up_down)
+                        let winid = s:_show_color(color, start_y, start_x, width, height, disappear, industry_name, up_down)
+                        if gap_num != 1 && gap_num != 2 && gap_num!=3
+                            call add(win_area, [winid, width * height, width, height, start_x, start_y])
+                        endif
                     endif
                     let start_x = start_x + width
                 endwhile
@@ -207,6 +261,23 @@ function! s:tile_stock_industry(...)
             endwhile
         endfor
         let x_list = s:get_start_list(total_columns, g:stock_width_split_num)
+    endfor
+    " 根据市值大小重新绘制
+    let win_area = sort(win_area, function('s:sort_area'))
+    let index = 0
+    for item in all_indusrty
+        let industry_name = item['name']
+        let up_down = item['up_down']
+        if up_down >= 0
+            let color = s:red[float2nr(stock#random() * len(s:red))]
+            let up_down = '+'.up_down.'%'
+        else
+            let color = s:green[float2nr(stock#random() * len(s:green))]
+            let up_down = '-'.up_down.'%'
+        endif
+        let win = win_area[index]
+        call s:_show_color(color, win[5], win[4], win[2], win[3], disappear, industry_name, up_down, win[0])
+        let index += 1
     endfor
 endfunction
 
@@ -221,7 +292,7 @@ function! s:get_blank(ss, width)
     return blank
 endfunction
 
-function! s:_show_color(color, line, column, width, height, disappear, industry_name, up_down)
+function! s:_show_color(color, line, column, width, height, disappear, industry_name, up_down, winid=0)
     if !s:has_popup
         echoerr "don't support popup"
         return
@@ -240,7 +311,13 @@ function! s:_show_color(color, line, column, width, height, disappear, industry_
     else
         call popup_clear()
     endif
-    let winid = popup_create('', options)
+    let winid = a:winid
+    if !winid
+        let winid = popup_create('', options)
+    else
+        call popup_close(winid)
+        let winid = popup_create('', options)
+    endif
     let winbuf = winbufnr(winid)
     if a:height / 2 > 1
         for l in range(1, a:height / 2 - 1)
@@ -262,6 +339,8 @@ function! s:_show_color(color, line, column, width, height, disappear, industry_
         endif
     endif
     silent execute 'highlight ColorHi'.substitute(a:color, '#', '', '').'  guifg='.guifg.' guibg='.color
+    return winid
 endfunction
 
 command! -nargs=* Ca call <SID>tile_stock_industry(<f-args>)
+command! -nargs=1 Car call <SID>tile_stock_industry_repeatable(<f-args>)

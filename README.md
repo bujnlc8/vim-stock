@@ -2,7 +2,7 @@
 
 先上图:
 
-[![55dFl8.png](https://z3.ax1x.com/2021/10/26/55dFl8.png)](https://imgtu.com/i/55dFl8)
+[![5IOsIg.png](https://z3.ax1x.com/2021/10/26/5IOsIg.png)](https://imgtu.com/i/5IOsIg)
 
 ## 安装
 
@@ -20,4 +20,5 @@ OR
 
 
 * `:Ca + [disappear]`， 以随机色块显示行业涨跌，绿色表示跌，红色表示涨。可接收一个参数`disappear`:是否自动消失，1是，0否，默认0。
+* `:Car + repeat_times`， 以随机色块显示行业涨跌，绿色表示跌，红色表示涨。可接收一个参数`repeat_times`:重复次数，15s刷新一次。
 
