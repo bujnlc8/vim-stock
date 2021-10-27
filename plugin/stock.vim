@@ -76,7 +76,7 @@ function! s:get_color(up_down, all_up, all_down)
     if a:up_down == 0
         return '#2b333e'
     endif
-    let up_down = a:up_down
+    let up_down = float2nr(a:up_down * 100)
     let index = 0
     if up_down > 0
         for x in a:all_up
@@ -199,13 +199,13 @@ function! s:tile_stock_industry(...)
     let all_indusrty = []
     let all_down = []
     let all_up = []
-    for x in range(3)
+    for x in range(4)
         for y in industry[x]
             call add(all_indusrty, y)
             if y['up_down'] > 0
-                call add(all_up, y['up_down'])
+                call add(all_up, float2nr(y['up_down'] * 100))
             elseif y['up_down'] < 0
-                call add(all_down, y['up_down'])
+                call add(all_down, float2nr(y['up_down'] * 100))
             endif
         endfor
     endfor
