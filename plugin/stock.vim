@@ -265,7 +265,7 @@ function! s:tile_stock_industry(...)
                         if up_down >= 0
                             let up_down = '+'.up_down.'%'
                         else
-                            let up_down = '-'.up_down.'%'
+                            let up_down = up_down.'%'
                         endif
                         if len(item['name']) == 0
                             if gap_num == 0
@@ -278,7 +278,7 @@ function! s:tile_stock_industry(...)
                                 let up_down = '★'.max_up['name'].'☆'
                             elseif gap_num == 2
                                 let color = '#223e36'
-                                let industry_name = '-'.max_down['up_down'].'%'
+                                let industry_name = max_down['up_down'].'%'
                                 let up_down = '☆'.max_down['name'].'★'
                                 let industry = s:get_industry()['industry']
                             endif
@@ -307,7 +307,7 @@ function! s:tile_stock_industry(...)
         if up_down >= 0
             let up_down = '+'.up_down.'%'
         else
-            let up_down = '-'.up_down.'%'
+            let up_down = up_down.'%'
         endif
         let win = win_area[index]
         call s:_show_color(color, win[5], win[4], win[2], win[3], disappear, industry_name, up_down, win[0])
